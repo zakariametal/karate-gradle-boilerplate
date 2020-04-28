@@ -1,4 +1,4 @@
-package examples;
+package automation;
 
 import com.intuit.karate.KarateOptions;
 import com.intuit.karate.Results;
