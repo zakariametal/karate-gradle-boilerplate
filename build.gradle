@@ -9,27 +9,30 @@ buildscript {
 }
 
 plugins {
-    id 'java'
+  id 'java'
+  id 'scala'
 }
 
 ext {
-    karateVersion = '0.9.5'
+  karateVersion = '0.9.5'
 }
 
 dependencies {
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.4.2'
-    testCompile "com.intuit.karate:karate-junit5:${karateVersion}"
-    testCompile "com.intuit.karate:karate-apache:${karateVersion}"
-    testCompile "net.masterthought:cucumber-reporting:3.8.0"
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+  testImplementation "com.intuit.karate:karate-junit5:${karateVersion}"
+  testImplementation "com.intuit.karate:karate-apache:${karateVersion}"
+  testImplementation "com.intuit.karate:karate-gatling:${karateVersion}"
+  testImplementation "net.masterthought:cucumber-reporting:3.8.0"
 }
 
 sourceSets {
-    test {
-        resources {
-            srcDir file('src/test/java')
-            exclude '**/*.java'
-        }
+  test {
+    resources {
+      srcDir file('src/test/java')
+      exclude '**/*.java'
+      exclude '**/*.scala'
     }
+  }
 }
 
 task testReport {
@@ -40,32 +43,48 @@ task testReport {
     Collection<File> jsonFiles = FileUtils.listFiles(new File("$buildDir/surefire-reports"), file_ext, true)
     List<String> jsonPaths = new ArrayList(jsonFiles.size())
     jsonFiles.each { file -> jsonPaths.add(file.getAbsolutePath()) }
-    net.masterthought.cucumber.Configuration config = new net.masterthought.cucumber.Configuration(new File("$buildDir"), "ins-insurance-automation")
+    net.masterthought.cucumber.Configuration config = new net.masterthought.cucumber.Configuration(new File("$buildDir"), "BOILERPLATE_CHANGE_ME")
     ReportBuilder reportBuilder = new ReportBuilder(jsonPaths, config)
     reportBuilder.generateReports()
     println "Report is generated at file://$config.reportDirectory.absolutePath/cucumber-html-reports/overview-features.html"
   }
 }
 
+task loadtestRun(type: JavaExec) {
+  classpath = sourceSets.test.runtimeClasspath
+  main = "io.gatling.app.Gatling"
+  doFirst {
+    group = 'Web Tests'
+    description = 'Run Gatling Tests'
+    println "Running simulation [${SIM_NAME}]"
+    new File("${buildDir}/reports/gatling").mkdirs()
+    args = [
+      '-s', "${SIM_NAME}",
+      '-rf', "${buildDir}/reports/gatling"
+    ]
+    //  systemProperty "karate.options", System.getProperty("karate.options")
+    systemProperties System.properties
+  }
+}
+
 test {
-    useJUnitPlatform()
-    systemProperty "karate.options", System.properties.getProperty("karate.options")
-    systemProperty "karate.env", System.properties.getProperty("karate.env")
-    outputs.upToDateWhen { false }
-    finalizedBy(testReport)
+  useJUnitPlatform()
+  systemProperties System.properties
+  outputs.upToDateWhen { false }
+  finalizedBy(testReport)
 }
 
 
 repositories {
-    mavenCentral()
-    // mavenLocal()
+  mavenCentral()
+  // mavenLocal()
 }
 
 task karateDebug(type: JavaExec) {
-    classpath = sourceSets.test.runtimeClasspath
-    main = 'com.intuit.karate.cli.Main'
+  classpath = sourceSets.test.runtimeClasspath
+  main = 'com.intuit.karate.cli.Main'
 }
 
 tasks.withType(Test) {
-    maxParallelForks = Runtime.runtime.availableProcessors()
+  maxParallelForks = Runtime.runtime.availableProcessors()
 }
