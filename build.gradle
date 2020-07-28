@@ -1,90 +1,76 @@
-import net.masterthought.cucumber.ReportBuilder
-import org.apache.commons.io.FileUtils
-
 buildscript {
-  dependencies {
-    classpath "net.masterthought:cucumber-reporting:3.8.0"
-    classpath "commons-io:commons-io:2.5"
+  repositories {
+    jcenter()
+    mavenCentral()
   }
 }
 
-plugins {
-  id 'java'
-  id 'scala'
-}
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'scala'
 
-ext {
-  karateVersion = '0.9.5'
-}
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
 
-dependencies {
-  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
-  testImplementation "com.intuit.karate:karate-junit5:${karateVersion}"
-  testImplementation "com.intuit.karate:karate-apache:${karateVersion}"
-  testImplementation "com.intuit.karate:karate-gatling:${karateVersion}"
-  testImplementation "net.masterthought:cucumber-reporting:3.8.0"
-}
-
-sourceSets {
-  test {
-    resources {
-      srcDir file('src/test/java')
-      exclude '**/*.java'
-      exclude '**/*.scala'
+  sourceSets {
+    test {
+      resources {
+        srcDir file('src/test/java')
+        exclude '**/*.java'
+        exclude '**/*.scala'
+      }
     }
   }
-}
 
-task testReport {
-  doLast {
-    println "Generating Karate reports..."
-
-    def file_ext = ["json"] as String[]
-    Collection<File> jsonFiles = FileUtils.listFiles(new File("$buildDir/surefire-reports"), file_ext, true)
-    List<String> jsonPaths = new ArrayList(jsonFiles.size())
-    jsonFiles.each { file -> jsonPaths.add(file.getAbsolutePath()) }
-    net.masterthought.cucumber.Configuration config = new net.masterthought.cucumber.Configuration(new File("$buildDir"), "BOILERPLATE_CHANGE_ME")
-    ReportBuilder reportBuilder = new ReportBuilder(jsonPaths, config)
-    reportBuilder.generateReports()
-    println "Report is generated at file://$config.reportDirectory.absolutePath/cucumber-html-reports/overview-features.html"
+  ext {
+    karateVersion = '0.9.5'
   }
-}
 
-task loadtestRun(type: JavaExec) {
-  classpath = sourceSets.test.runtimeClasspath
-  main = "io.gatling.app.Gatling"
-  doFirst {
-    group = 'Web Tests'
-    description = 'Run Gatling Tests'
-    println "Running simulation [${SIM_NAME}]"
-    new File("${buildDir}/reports/gatling").mkdirs()
-    args = [
+  dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    testImplementation "com.intuit.karate:karate-junit5:${karateVersion}"
+    testImplementation "com.intuit.karate:karate-apache:${karateVersion}"
+    testImplementation "com.intuit.karate:karate-gatling:${karateVersion}"
+    testImplementation 'net.masterthought:cucumber-reporting:3.8.0'
+  }
+
+  task loadtestRun(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'io.gatling.app.Gatling'
+    doFirst {
+      group = 'Web Tests'
+      description = 'Run Gatling Tests'
+      println "Running simulation [${SIM_NAME}]"
+      new File("${buildDir}/reports/gatling").mkdirs()
+      args = [
       '-s', "${SIM_NAME}",
       '-rf', "${buildDir}/reports/gatling"
     ]
-    //  systemProperty "karate.options", System.getProperty("karate.options")
-    systemProperties System.properties
+      //  systemProperty "karate.options", System.getProperty("karate.options")
+      systemProperties System.properties
+    }
   }
-}
 
-test {
-  useJUnitPlatform()
-  systemProperties System.properties
-  outputs.upToDateWhen { false }
-  finalizedBy(testReport)
-}
+  test {
+    useJUnitPlatform()
+    systemProperties System.properties
+    outputs.upToDateWhen { false }
+    testLogging {
+      showStandardStreams = true
+    }
+    systemProperty 'projectName', project.name
+    systemProperty 'projectDir', project.projectDir.absolutePath
+    systemProperty 'buildDir', project.buildDir.absolutePath
+  }
 
+  task karateDebug(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'com.intuit.karate.cli.Main'
+  }
 
-repositories {
-  mavenCentral()
-  // mavenLocal()
-}
-
-task karateDebug(type: JavaExec) {
-  classpath = sourceSets.test.runtimeClasspath
-  main = 'com.intuit.karate.cli.Main'
-}
-
-tasks.withType(Test) {
-  maxParallelForks = Runtime.runtime.availableProcessors()
+  tasks.withType(Test) {
+    maxParallelForks = Runtime.runtime.availableProcessors()
+  }
 }
