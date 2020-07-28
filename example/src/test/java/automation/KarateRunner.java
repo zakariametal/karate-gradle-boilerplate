@@ -38,18 +38,18 @@ class KarateRunner {
   }
 
   public static void generateReport(Results results) {
-    String karateOutputPath = Paths.get(System.getProperty("projectDir"), results.getReportDir()).toString();
+    String karateOutputPath = Paths.get(System.getProperty("project.dir"), results.getReportDir()).toString();
     Collection<File> jsonFiles = FileUtils.listFiles(new File(karateOutputPath), new String[] {"json"}, true);
     List<String> jsonPaths = new ArrayList(jsonFiles.size());
     jsonFiles.forEach(file -> jsonPaths.add(file.getAbsolutePath()));
-    String outputDir = System.getProperty("buildDir");
-    Configuration config = new Configuration(new File(outputDir), System.getProperty("projectName"));
+    String outputDir = System.getProperty("build.dir");
+    Configuration config = new Configuration(new File(outputDir), System.getProperty("project.name"));
     config.addClassifications("OS Name", System.getProperty("os.name"));
     config.addClassifications("Triggered by", System.getProperty("user.name"));
     config.addClassifications("Environment", System.getProperty("karate.env"));
     ReportBuilder reportBuilder = new ReportBuilder(jsonPaths, config);
     reportBuilder.generateReports();
-    String reportPath = Paths.get(System.getProperty("buildDir"), reportBuilder.BASE_DIRECTORY, reportBuilder.HOME_PAGE).toString();
+    String reportPath = Paths.get(System.getProperty("build.dir"), reportBuilder.BASE_DIRECTORY, reportBuilder.HOME_PAGE).toString();
     System.out.println("Report is generated at :" + reportPath);
   }
 }

@@ -60,9 +60,9 @@ subprojects {
     testLogging {
       showStandardStreams = true
     }
-    systemProperty 'projectName', project.name
-    systemProperty 'projectDir', project.projectDir.absolutePath
-    systemProperty 'buildDir', project.buildDir.absolutePath
+    systemProperty 'project.name', project.name
+    systemProperty 'project.dir', project.projectDir.absolutePath
+    systemProperty 'build.dir', project.buildDir.absolutePath
   }
 
   task karateDebug(type: JavaExec) {
