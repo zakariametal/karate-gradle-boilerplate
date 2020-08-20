@@ -5,9 +5,23 @@ buildscript {
   }
 }
 
+plugins {
+  id 'application'
+  id 'java'
+  id 'scala'
+  id 'com.google.cloud.tools.jib' version '2.4.0' apply false
+}
+
+wrapper {
+  gradleVersion = '6.5'
+  distributionType = 'bin'
+}
+
 subprojects {
   apply plugin: 'java'
   apply plugin: 'scala'
+  apply plugin: 'com.google.cloud.tools.jib'
+  apply plugin: 'application'
 
   repositories {
     mavenCentral()
@@ -25,10 +39,12 @@ subprojects {
   }
 
   ext {
-    karateVersion = '0.9.5'
+    karateVersion = '0.9.6.RC4'
   }
 
   dependencies {
+    implementation 'commons-io:commons-io:2.7'
+    implementation "com.intuit.karate:karate-jersey:${karateVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testImplementation "com.intuit.karate:karate-junit5:${karateVersion}"
     testImplementation "com.intuit.karate:karate-apache:${karateVersion}"

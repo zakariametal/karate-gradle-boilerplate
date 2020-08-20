@@ -1,0 +1,6 @@
+version: "3.7"
+services:
+  example:
+    image: 000.dkr.ecr.ap-southeast-1.amazonaws.com/example_mock-app:latest
+    ports:
+      - "60999:60999"

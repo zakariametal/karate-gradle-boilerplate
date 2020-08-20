@@ -2,6 +2,28 @@
 
 Automation tests (API tests / integration tests / performance tests) using the [Karate](https://intuit.github.io/karate/) framework. Reuse your `.feature` files between different types of tests!
 
+## Run mocks
+
+Karate comes with the ability to setup mocks. Mocks are artifacts shared between a service producer and consumer for an API contract. A producer can run API tests against the mocks to ensure that consumer mocks stay up to date with the contract.
+
+To run the example mock:
+
+```
+./gradlew :example:run
+```
+
+To publish the mock to local [docker](https://www.docker.com/get-starte) daemon:
+
+```
+./gradlew jibDockerBuild
+```
+
+To publish the mock to a docker registry, you first need to configure [jib](./example/build.gradle). Then:
+
+```
+./gradlew jib
+```
+
 ## Execute API tests / integration tests
 
 Options:

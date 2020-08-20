@@ -1,0 +1,30 @@
+ext {
+  // replace the ECR repo url accordingly
+  ecr_repo_url = '000.dkr.ecr.ap-southeast-1.amazonaws.com/example_mock-app'
+  ecr_image_tag = project.findProperty('dockerImageVersion') ?: 'testing'
+  main_class = 'automation.MockServer'
+}
+
+application {
+  mainClass = main_class
+}
+
+jib {
+  from {
+    image = 'gcr.io/distroless/java:11'
+  }
+  to {
+    image = ecr_repo_url
+    auth {
+      username = 'AWS'
+      password = System.getenv('ECR_LOGIN_PASSWORD')
+    }
+    tags = [ecr_image_tag]
+  }
+  container {
+    jvmFlags = ['-Xms512m']
+    mainClass = main_class
+    args = []
+    ports = ['60999']
+  }
+}
