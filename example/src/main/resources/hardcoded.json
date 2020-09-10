@@ -1,0 +1,6 @@
+{
+  "data": [
+    { "type": "cat", "name": "billy" },
+    { "type": "cat", "name": "sally" }
+  ]
+}

@@ -10,5 +10,7 @@ Feature:
     * def response = c
   Scenario: pathMatches('/cats/{id}')
     * def response = m[pathParams.id]
+  Scenario: pathMatches('/cats/list/hardcoded')
+    * def response = read("./hardcoded.json")
   Scenario:
     * karate.proceed("http://dummy.restapiexample.com")
